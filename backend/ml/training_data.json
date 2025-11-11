@@ -1,0 +1,398 @@
+[
+  {
+    "month": "2022-03",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 18918.61,
+      "misc": 38549.72
+    }
+  },
+  {
+    "month": "2022-04",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 20812.13,
+      "misc": 36865.87
+    }
+  },
+  {
+    "month": "2022-05",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 18447.39,
+      "misc": 38569.5
+    }
+  },
+  {
+    "month": "2022-06",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 14622.65,
+      "misc": 57600.16
+    }
+  },
+  {
+    "month": "2022-07",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 20961.05,
+      "misc": 37429.49
+    }
+  },
+  {
+    "month": "2022-08",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 11854.58,
+      "misc": 43807.92
+    }
+  },
+  {
+    "month": "2022-09",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 17855.5,
+      "misc": 32356.3
+    }
+  },
+  {
+    "month": "2022-10",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 17745.64,
+      "misc": 32190.93
+    }
+  },
+  {
+    "month": "2022-11",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 15545.05,
+      "misc": 28129.77
+    }
+  },
+  {
+    "month": "2022-12",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 18425.97,
+      "misc": 61132.25
+    }
+  },
+  {
+    "month": "2023-01",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 17364.52,
+      "misc": 53415.67
+    }
+  },
+  {
+    "month": "2023-02",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 16987.11,
+      "misc": 70451.97
+    }
+  },
+  {
+    "month": "2023-03",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 17530.33,
+      "misc": 24442.32
+    }
+  },
+  {
+    "month": "2023-04",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 20348.18,
+      "misc": 37594.45
+    }
+  },
+  {
+    "month": "2023-05",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 13884.27,
+      "misc": 47377.659999999996
+    }
+  },
+  {
+    "month": "2023-06",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 11446.37,
+      "misc": 59516.58
+    }
+  },
+  {
+    "month": "2023-07",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 19232.29,
+      "misc": 29018.45
+    }
+  },
+  {
+    "month": "2023-08",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 18559.73,
+      "misc": 30748.62
+    }
+  },
+  {
+    "month": "2023-09",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 18347.9,
+      "misc": 45473.33
+    }
+  },
+  {
+    "month": "2023-10",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 21469.09,
+      "misc": 20449.8
+    }
+  },
+  {
+    "month": "2023-11",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 18499.64,
+      "misc": 43635.94
+    }
+  },
+  {
+    "month": "2023-12",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 17610.11,
+      "misc": 45852.46
+    }
+  },
+  {
+    "month": "2024-01",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 18978.56,
+      "misc": 34528.9
+    }
+  },
+  {
+    "month": "2024-02",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 15509.52,
+      "misc": 44562.4
+    }
+  },
+  {
+    "month": "2024-03",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 13195.84,
+      "misc": 43948.11
+    }
+  },
+  {
+    "month": "2024-04",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 17913.53,
+      "misc": 35471.86
+    }
+  },
+  {
+    "month": "2024-05",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 16995.829999999998,
+      "misc": 25375.77
+    }
+  },
+  {
+    "month": "2024-06",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 16783.73,
+      "misc": 49266.74
+    }
+  },
+  {
+    "month": "2024-07",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 14487.02,
+      "misc": 55436.11
+    }
+  },
+  {
+    "month": "2024-08",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 15216.36,
+      "misc": 33928.08
+    }
+  },
+  {
+    "month": "2024-09",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 20847.39,
+      "misc": 36288.79
+    }
+  },
+  {
+    "month": "2024-10",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 13680.89,
+      "misc": 36236.42
+    }
+  },
+  {
+    "month": "2024-11",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 16541.16,
+      "misc": 74452.27
+    }
+  },
+  {
+    "month": "2024-12",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 20132.38,
+      "misc": 42936.41
+    }
+  },
+  {
+    "month": "2025-01",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 19757.86,
+      "misc": 21627.3
+    }
+  },
+  {
+    "month": "2025-02",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 18779.52,
+      "misc": 37534.95
+    }
+  },
+  {
+    "month": "2025-03",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 18098.17,
+      "misc": 37843.7
+    }
+  },
+  {
+    "month": "2025-04",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 18903.63,
+      "misc": 35439.04
+    }
+  },
+  {
+    "month": "2025-05",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 20638.45,
+      "misc": 29341.25
+    }
+  },
+  {
+    "month": "2025-06",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 17393.63,
+      "misc": 43351.16
+    }
+  },
+  {
+    "month": "2025-07",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 17544.95,
+      "misc": 45021.06
+    }
+  },
+  {
+    "month": "2025-08",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 17840.43,
+      "misc": 43011.22
+    }
+  },
+  {
+    "month": "2025-09",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 13326.68,
+      "misc": 42837.36
+    }
+  },
+  {
+    "month": "2025-10",
+    "income": 60000,
+    "savings_goal": 15000,
+    "categories": {
+      "food": 18568.38,
+      "misc": 31065.52
+    }
+  }
+]

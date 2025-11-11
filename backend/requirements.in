@@ -3,3 +3,7 @@ uvicorn
 python-dotenv 
 pydantic
 python-dateutil
+numpy
+torch
+scikit-learn
+pandas
