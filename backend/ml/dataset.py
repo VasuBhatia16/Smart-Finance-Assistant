@@ -1,39 +1,30 @@
+# backend/ml/dataset.py
 import torch
 from torch.utils.data import Dataset
-import numpy as np
 
 class TimeSeriesDataset(Dataset):
-    """
-    Sequence dataset for LSTM:
-    input: window of size W
-    target: next-month expense (unscaled or scaled)
-    """
-
-    def __init__(self, feature_matrix, window_size, target_index=2):
+    def __init__(self, M_scaled, window_size=6, target_idx=2):
         """
-        feature_matrix: numpy array (T, F)
-        window_size: number of timesteps used as input
-        target_index: index of feature to predict (default = total_expense)
+        M_scaled: numpy array (T, F)
+        window_size: number of timesteps in each input window
+        target_idx: which feature index to predict (2 = total_exp per preprocess.py)
         """
-        self.X = feature_matrix  # (T, F)
-        self.window_size = window_size
-        self.target_index = target_index
+        self.M = M_scaled
+        self.W = window_size
+        self.target_idx = target_idx
 
-        self.data = []
-        self.labels = []
-
-        for i in range(len(feature_matrix) - window_size):
-            window = feature_matrix[i:i + window_size]
-            target = feature_matrix[i + window_size, target_index]
-
-            self.data.append(window)
-            self.labels.append(target)
-
-        self.data = np.array(self.data, dtype=np.float32)
-        self.labels = np.array(self.labels, dtype=np.float32)
+        if self.M.shape[0] < self.W:
+            raise ValueError(f"Not enough rows: {self.M.shape[0]} < window_size {self.W}")
 
     def __len__(self):
-        return len(self.data)
+        return self.M.shape[0] - self.W + 1
 
-    def __getitem__(self, idx):
-        return torch.tensor(self.data[idx]), torch.tensor(self.labels[idx])
+    def __getitem__(self, i):
+        # X window
+        x = self.M[i:i+self.W, :]                 # (W, F)
+        # y = target at the last timestep of the window
+        y = self.M[i+self.W-1, self.target_idx]
+
+        x = torch.tensor(x, dtype=torch.float32)
+        y = torch.tensor(y, dtype=torch.float32)
+        return x, y

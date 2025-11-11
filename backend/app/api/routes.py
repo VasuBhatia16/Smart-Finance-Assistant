@@ -1,8 +1,14 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from app.schemas.predict import PredictRequest, PredictResponse, ForecastPoint
 from app.utils.date_utils import add_months
 
+
+from ml.predict import Predictor
+
+
 router = APIRouter()
+
+predictor = Predictor()
 
 
 @router.get("/health")
@@ -12,41 +18,61 @@ def health():
 
 @router.post("/predict", response_model=PredictResponse)
 def predict(req: PredictRequest):
+    """
+    Predict future monthly expenses and projected savings using trained LSTM.
+    Includes category-level dynamic breakdown.
+    """
 
     history = req.history
-
-    # requires history of minimum 3 months to predict
-    if len(history) < 3:
+    
+    if len(history) < 6:
         return PredictResponse(
-            forecast=[], note="At least 3 months of data required."
+            forecast=[],
+            note="At least 6 months of historical data required for ML prediction."
         )
 
-    # last year-month
-    last_year, last_month = map(int, history[-1].month.split("-"))
+    hist_dicts = [h.dict() for h in history]
 
-    # average of last 3 months total expenses
-    last_three = history[-3:]
-    totals = [sum(h.categories.values()) for h in last_three]
-    avg_expense = sum(totals) / 3
+    
+    try:
+        ml_result = predictor.predict_next_month(hist_dicts, window=6)
+        predicted_total = float(ml_result["predicted_total_expenses"])
+        breakdown = ml_result["category_breakdown"]  # dict[str, float]
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Prediction error: {str(e)}"
+        )
 
     forecast_list = []
 
+    last_year, last_month = map(int, history[-1].month.split("-"))
+
     for i in range(1, req.horizon + 1):
-        y, m = add_months(last_year, last_month, i)
-        f_month = f"{y:04d}-{m:02d}"
 
-        projected_expense = avg_expense
-        projected_savings = history[-1].income - projected_expense
+        
+        f_year, f_month = add_months(last_year, last_month, i)
+        f_month_str = f"{f_year:04d}-{f_month:02d}"
 
+        
+        total_expense = predicted_total
+
+        
+        projected_savings = history[-1].income - total_expense
+
+        
         forecast_list.append(
             ForecastPoint(
-                month=f_month,
-                total_expense=round(projected_expense, 2),
-                projected_savings=round(projected_savings, 2)
+                month=f_month_str,
+                total_expense=round(total_expense, 2),
+                projected_savings=round(projected_savings, 2),
+                category_breakdown={
+                    cat: round(val, 2) for cat, val in breakdown.items()
+                }
             )
         )
 
     return PredictResponse(
         forecast=forecast_list,
-        note="Baseline moving-average forecast. ML model integration pending."
+        note="Forecast generated using trained LSTM model with dynamic category breakdown."
     )

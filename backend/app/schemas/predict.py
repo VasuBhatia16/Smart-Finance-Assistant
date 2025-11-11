@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 
 class MonthlyRecord(BaseModel):
@@ -18,6 +18,7 @@ class ForecastPoint(BaseModel):
     month: str
     total_expense: float
     projected_savings: float
+    category_breakdown: Optional[Dict[str, float]] = None
 
 
 class PredictResponse(BaseModel):
