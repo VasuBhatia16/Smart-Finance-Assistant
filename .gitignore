@@ -1,0 +1,11 @@
+# root
+.DS_Store
+.env
+dist/
+# node
+node_modules/
+# python
+**/__pycache__/
+**/*.pyc
+**/.venv/
+**/venv/
