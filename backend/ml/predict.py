@@ -12,8 +12,8 @@ TARGET_IDX = 2  # total_expense is the 3rd feature per preprocess.py
 class Predictor:
     def __init__(self, model_path: str | None = None, scaler_path: str | None = None):
         here = os.path.dirname(__file__)
-        self.model_path = model_path or os.path.join(here, "lstm_model.pt")
-        self.scaler_path = scaler_path or os.path.join(here, "scaler.pkl")
+        self.model_path = model_path or os.path.join(here,"lstm", "lstm_model.pt")
+        self.scaler_path = scaler_path or os.path.join(here,"lstm", "scaler.pkl")
 
         if not os.path.exists(self.scaler_path):
             raise FileNotFoundError(f"Scaler not found at {self.scaler_path}")

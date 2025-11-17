@@ -12,6 +12,7 @@ class MonthlyRecord(BaseModel):
 class PredictRequest(BaseModel):
     history: List[MonthlyRecord] = Field(..., min_items=3)
     horizon: int = Field(3, ge=1, le=12)
+    model_type: Optional[str]
 
 
 class ForecastPoint(BaseModel):

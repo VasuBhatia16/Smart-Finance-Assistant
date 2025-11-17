@@ -85,13 +85,21 @@ def train_model(history, window=6, epochs=50, batch_size=16, lr=1e-3, patience=5
                 print("\nEarly stopping triggered!")
                 break
 
-    torch.save(best_state or model.state_dict(), "lstm_model.pt")
-    with open("scaler.pkl", "wb") as f:
+    save_dir = os.path.join(os.path.dirname(__file__), "lstm")
+    os.makedirs(save_dir, exist_ok=True)
+
+    model_path = os.path.join(save_dir, "lstm_model.pt")
+    scaler_path = os.path.join(save_dir, "scaler.pkl")
+
+    torch.save(best_state or model.state_dict(), model_path)
+
+    with open(scaler_path, "wb") as f:
         pickle.dump(scaler, f)
 
     print("\nTraining complete.")
     print(f"Best Validation Loss: {best_val:.4f}")
-    print("Model saved to lstm_model.pt, scaler saved to scaler.pkl.")
+    print(f"Model saved to: {model_path}")
+    print(f"Scaler saved to: {scaler_path}")
 
 if __name__ == "__main__":
     current_dir = os.path.dirname(__file__)

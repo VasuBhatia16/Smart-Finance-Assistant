@@ -3,12 +3,11 @@ from app.schemas.predict import PredictRequest, PredictResponse, ForecastPoint
 from app.utils.date_utils import add_months
 
 
-from ml.predict import Predictor
+from ml.predict_new import Predictor
 
 
 router = APIRouter()
 
-predictor = Predictor()
 
 
 @router.get("/health")
@@ -24,7 +23,8 @@ def predict(req: PredictRequest):
     """
 
     history = req.history
-    
+    model_type = req.model_type or "lstm"
+    predictor = Predictor(model_type=model_type)
     if len(history) < 6:
         return PredictResponse(
             forecast=[],
@@ -71,8 +71,11 @@ def predict(req: PredictRequest):
                 }
             )
         )
-
+    if req.model_type == "lstm":
+        note = "Forecast generated using trained LSTM model with dynamic category breakdown."
+    else:
+        note = "Forecast generated using trained XGBoost model with dynamic category breakdown."
     return PredictResponse(
         forecast=forecast_list,
-        note="Forecast generated using trained LSTM model with dynamic category breakdown."
+        note=note
     )
