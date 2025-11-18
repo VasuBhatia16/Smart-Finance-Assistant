@@ -1,358 +1,297 @@
-import { useMemo, useState } from "react";
-import api from "./lib/api";
-import "./App.css";
+import { useState } from "react";
+import axios from "axios";
 
-type Categories = Record<string, number>;
+interface Category {
+  name: string;
+  amount: number;
+}
 
-type MonthlyRecord = {
-  month: string;          // YYYY-MM
+interface MonthRecord {
+  month: string;
   income: number;
   savings_goal: number;
-  categories: Categories; // { rent: 12000, food: 7000, ... }
-};
+  categories: Category[];
+}
 
-type ForecastPoint = {
+interface ForecastItem {
   month: string;
   total_expense: number;
   projected_savings: number;
-};
-
-type PredictResponse = {
-  forecast: ForecastPoint[];
-  note?: string | null;
-};
-
-const DEFAULT_CATS: Categories = {
-  rent: 12000,
-  food: 7000,
-  utilities: 3000,
-  travel: 2000,
-};
-
-function sumCategories(cats: Categories): number {
-  return Object.values(cats).reduce((a, b) => a + Number(b || 0), 0);
-}
-
-function isYYYYMM(v: string) {
-  return /^\d{4}-\d{2}$/.test(v);
+  category_breakdown: Record<string, number>;
 }
 
 export default function App() {
-  // ---- State: history list & editor form ----
-  const [history, setHistory] = useState<MonthlyRecord[]>([
-    { month: "2025-06", income: 60000, savings_goal: 15000, categories: { ...DEFAULT_CATS, shopping: 2500 } },
-    { month: "2025-07", income: 60000, savings_goal: 15000, categories: { ...DEFAULT_CATS, food: 6500 } },
-    { month: "2025-08", income: 60000, savings_goal: 15000, categories: { ...DEFAULT_CATS, shopping: 3500 } },
-  ]);
-
-  // editor fields for creating a new month row
-  const [month, setMonth] = useState<string>("2025-09");
+  const [history, setHistory] = useState<MonthRecord[]>([]);
+  const [month, setMonth] = useState("");
   const [income, setIncome] = useState<number>(60000);
-  const [goal, setGoal] = useState<number>(15000);
-  const [cats, setCats] = useState<Categories>({ ...DEFAULT_CATS });
+  const [savingsGoal, setSavingsGoal] = useState<number>(15000);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [modelType, setModelType] = useState("lstm");
+  const [horizon, setHorizon] = useState(1);
+  const [forecast, setForecast] = useState<ForecastItem[] | null>(null);
 
-  // UI control
-  const [horizon, setHorizon] = useState<number>(3);
-  const [loading, setLoading] = useState(false);
-  const [resp, setResp] = useState<PredictResponse | null>(null);
+  const addCategory = () => {
+    setCategories([...categories, { name: "", amount: 0 }]);
+  };
 
-  // ---- Derived values ----
-  const totalOfEditor = useMemo(() => sumCategories(cats), [cats]);
-
-  const canAdd =
-    isYYYYMM(month) &&
-    income >= 0 &&
-    goal >= 0 &&
-    totalOfEditor >= 0;
-
-  const canPredict = history.length >= 3 && horizon >= 1 && horizon <= 12;
-
-  // ---- Event handlers ----
-  function handleAddCategoryRow() {
-    // add a placeholder category name that doesn't clash
-    let base = "other";
-    let idx = 1;
-    while (cats.hasOwnProperty(idx === 1 ? base : `${base}${idx}`)) idx++;
-    const key = idx === 1 ? base : `${base}${idx}`;
-    setCats({ ...cats, [key]: 0 });
-  }
-
-  function handleRemoveCategory(key: string) {
-    const copy = { ...cats };
-    delete copy[key];
-    setCats(copy);
-  }
-
-  function handleChangeCategoryName(oldKey: string, newKey: string) {
-    if (!newKey || newKey === oldKey) return;
-    if (cats.hasOwnProperty(newKey)) {
-      alert("Category name already exists.");
-      return;
+  const updateCategory = (i: number, field: "name" | "amount", value: string) => {
+    const updated = [...categories];
+    if (field === "amount") {
+      updated[i].amount = Number(value);
+    } else {
+      updated[i].name = value;
     }
-    const copy: Categories = {};
-    Object.entries(cats).forEach(([k, v]) => {
-      copy[k === oldKey ? newKey : k] = v;
-    });
-    setCats(copy);
-  }
+    setCategories(updated);
+  };
 
-  function handleChangeCategoryAmount(key: string, amt: number) {
-    setCats(prev => ({ ...prev, [key]: isFinite(amt) ? amt : 0 }));
-  }
+  const removeCategory = (i: number) => {
+    setCategories(categories.filter((_, x) => x !== i));
+  };
 
-  function handleAddMonth() {
-    if (!canAdd) {
-      alert("Please fix inputs (YYYY-MM month, non-negative numbers).");
-      return;
-    }
-    setHistory(prev => [
-      ...prev,
+  const addMonth = () => {
+    if (!month) return;
+
+    setHistory([
+      ...history,
       {
         month,
         income,
-        savings_goal: goal,
-        categories: { ...cats },
+        savings_goal: savingsGoal,
+        categories,
       },
     ]);
 
-    // next month helper: auto-advance the month field
-    const [yStr, mStr] = month.split("-");
-    const y = parseInt(yStr, 10);
-    const m = parseInt(mStr, 10);
-    const nextM = ((m % 12) + 1);
-    const nextY = y + (m === 12 ? 1 : 0);
-    setMonth(`${nextY.toString().padStart(4, "0")}-${nextM.toString().padStart(2, "0")}`);
-  }
+    setCategories([]);
+    setMonth("");
+  };
 
-  function handleRemoveHistory(idx: number) {
-    setHistory(prev => prev.filter((_, i) => i !== idx));
-  }
+  const removeMonth = (index: number) => {
+    setHistory(history.filter((_, i) => i !== index));
+  };
 
-  async function runPredict() {
-    if (!canPredict) {
-      alert("Need at least 3 months in history and 1–12 horizon.");
-      return;
-    }
-    setLoading(true);
-    setResp(null);
+  const runForecast = async () => {
+    setForecast(null);
+
     try {
-      const payload = { history, horizon };
-      const r = await api.post<PredictResponse>("/predict", payload);
-      setResp(r.data);
+      const res = await axios.post("http://localhost:8000/api/predict", {
+        history,
+        horizon,
+        model_type: modelType,
+      });
+
+      setForecast(res.data.forecast);
     } catch (e) {
+      alert("Prediction failed");
       console.error(e);
-      alert("Prediction failed. Check backend logs.");
-    } finally {
-      setLoading(false);
     }
-  }
+  };
 
-  function resetEditorToLastIncome() {
-    const last = history[history.length - 1];
-    if (last) {
-      setIncome(last.income);
-      setGoal(last.savings_goal);
-    }
-  }
-
-  // ---- Render ----
   return (
-    <div className="app-container">
-      <header className="app-header">
-        <h1>Smart Personal Finance Assistant</h1>
-        <span className="helper">Advanced input • backend-connected</span>
-      </header>
-
-      <main className="content">
-        {/* Editor Card */}
-        <div className="card" style={{ marginBottom: 16 }}>
-          <h2 className="section-title">Add Monthly Record</h2>
-
-          <div className="grid-3">
-            <div>
-              <label className="label">Month (YYYY-MM)</label>
-              <input
-                className="input"
-                type="month"
-                value={month}
-                onChange={(e) => setMonth(e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="label">Income (₹)</label>
-              <input
-                className="input"
-                type="number"
-                value={income}
-                onChange={(e) => setIncome(Number(e.target.value))}
-                min={0}
-              />
-            </div>
-            <div>
-              <label className="label">Savings Goal (₹)</label>
-              <input
-                className="input"
-                type="number"
-                value={goal}
-                onChange={(e) => setGoal(Number(e.target.value))}
-                min={0}
-              />
-            </div>
-          </div>
-
-          <div style={{ marginTop: 16 }}>
-            <div className="row" style={{ alignItems: "center", justifyContent: "space-between" }}>
-              <h3 className="section-title" style={{ margin: 0 }}>Categories</h3>
-              <div className="helper">
-                Total: <span className="badge">₹ {totalOfEditor.toLocaleString("en-IN")}</span>
-              </div>
-            </div>
-
-            {/* Category rows */}
-            <div className="row" style={{ flexDirection: "column" }}>
-              {Object.entries(cats).map(([key, val]) => (
-                <div key={key} className="cat-row">
-                  <input
-                    className="input cat-name"
-                    value={key}
-                    onChange={(e) => handleChangeCategoryName(key, e.target.value.trim())}
-                    placeholder="Category name"
-                  />
-                  <input
-                    className="input cat-amt"
-                    type="number"
-                    value={val}
-                    min={0}
-                    onChange={(e) => handleChangeCategoryAmount(key, Number(e.target.value))}
-                    placeholder="Amount"
-                  />
-                  <button className="btn btn-ghost" onClick={() => handleRemoveCategory(key)}>
-                    Remove
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            <div className="row" style={{ marginTop: 12 }}>
-              <button className="btn btn-ghost" onClick={handleAddCategoryRow}>
-                + Add Category
-              </button>
-              <span className="helper">
-                Tip: Click on a category name to rename it. Use <span className="kbd">Tab</span> to move quickly.
-              </span>
-            </div>
-          </div>
-
-          <div className="row" style={{ marginTop: 16 }}>
-            <button className="btn" onClick={handleAddMonth} disabled={!canAdd}>
-              Add Month to History
-            </button>
-            <button className="btn btn-ghost" onClick={resetEditorToLastIncome}>
-              Use Last Income/Goal
-            </button>
-          </div>
+    <div className="min-h-screen bg-gray-100 text-gray-900 p-8">
+      <div className="max-w-6xl mx-auto space-y-8">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Smart Finance Assistant
+          </h1>
         </div>
 
-        {/* History Table */}
-        <div className="card" style={{ marginBottom: 16 }}>
-          <h2 className="section-title">History</h2>
-          {history.length === 0 ? (
-            <p className="helper">No records yet. Add at least three months to enable forecasting.</p>
-          ) : (
-            <div style={{ overflowX: "auto" }}>
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Month</th>
-                    <th className="num">Income (₹)</th>
-                    <th className="num">Savings Goal (₹)</th>
-                    <th className="num">Total Expense (₹)</th>
-                    <th>Top Categories</th>
-                    <th className="num">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {history.map((h, idx) => {
-                    const total = sumCategories(h.categories);
-                    const topCats = Object.entries(h.categories)
-                      .sort((a, b) => b[1] - a[1])
-                      .slice(0, 3)
-                      .map(([k, v]) => `${k}: ₹${v.toLocaleString("en-IN")}`)
-                      .join(", ");
-                    return (
-                      <tr key={idx}>
-                        <td>{h.month}</td>
-                        <td className="num">{h.income.toLocaleString("en-IN")}</td>
-                        <td className="num">{h.savings_goal.toLocaleString("en-IN")}</td>
-                        <td className="num">{total.toLocaleString("en-IN")}</td>
-                        <td>{topCats || <span className="helper">—</span>}</td>
-                        <td className="num">
-                          <button className="btn btn-danger" onClick={() => handleRemoveHistory(idx)}>
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+        {/* Control Panel */}
+        <div className="bg-white shadow rounded-lg p-6 space-y-4">
 
-          <div className="row" style={{ marginTop: 16, alignItems: "center" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <label className="label" style={{ margin: 0 }}>Horizon (months)</label>
+          {/* Model + Horizon Panel */}
+          <div className="flex gap-6 items-center">
+            <div className="space-y-1">
+              <label className="font-medium">Model</label>
+              <select
+                value={modelType}
+                onChange={(e) => setModelType(e.target.value)}
+                className="border rounded px-3 py-2 w-48"
+              >
+                <option value="lstm">LSTM (Neural)</option>
+                <option value="xgb">XGBoost</option>
+              </select>
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-medium">Horizon</label>
               <input
-                className="input"
                 type="number"
                 min={1}
                 max={12}
                 value={horizon}
+                className="border px-3 py-2 rounded w-32"
                 onChange={(e) => setHorizon(Number(e.target.value))}
-                style={{ width: 90 }}
               />
             </div>
-            <button className="btn" onClick={runPredict} disabled={!canPredict || loading}>
-              {loading ? "Predicting..." : "Run Forecast"}
+
+            <button
+              onClick={runForecast}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md font-medium"
+            >
+              Run Forecast
             </button>
-            <span className="helper">Need at least 3 months in history.</span>
           </div>
         </div>
 
-        {/* Prediction Results */}
-        <div className="card">
-          <h2 className="section-title">Forecast</h2>
-          {!resp ? (
-            <p className="helper">No forecast yet. Add months and click “Run Forecast”.</p>
-          ) : resp.forecast.length === 0 ? (
-            <p className="helper">{resp.note || "No results."}</p>
-          ) : (
-            <>
-              <div className="helper" style={{ marginBottom: 8 }}>{resp.note}</div>
-              <div style={{ overflowX: "auto" }}>
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Month</th>
-                      <th className="num">Projected Expense (₹)</th>
-                      <th className="num">Projected Savings (₹)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {resp.forecast.map((f) => (
-                      <tr key={f.month}>
-                        <td>{f.month}</td>
-                        <td className="num">{f.total_expense.toLocaleString("en-IN")}</td>
-                        <td className="num">{f.projected_savings.toLocaleString("en-IN")}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+        {/* Add Monthly Record */}
+        <div className="bg-white shadow rounded-lg p-6 space-y-6">
+          <h2 className="text-lg font-semibold">Add Monthly Record</h2>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="font-medium">Month (YYYY-MM)</label>
+              <input
+                value={month}
+                onChange={(e) => setMonth(e.target.value)}
+                placeholder="2025-09"
+                className="border rounded px-3 py-2 w-full"
+              />
+            </div>
+
+            <div>
+              <label className="font-medium">Income</label>
+              <input
+                type="number"
+                value={income}
+                onChange={(e) => setIncome(Number(e.target.value))}
+                className="border rounded px-3 py-2 w-full"
+              />
+            </div>
+
+            <div>
+              <label className="font-medium">Savings Goal</label>
+              <input
+                type="number"
+                value={savingsGoal}
+                onChange={(e) => setSavingsGoal(Number(e.target.value))}
+                className="border rounded px-3 py-2 w-full"
+              />
+            </div>
+          </div>
+
+          {/* Categories */}
+          <div className="space-y-3">
+            <h3 className="font-medium">Categories</h3>
+
+            {categories.map((c, i) => (
+              <div className="flex items-center gap-4" key={i}>
+                <input
+                  value={c.name}
+                  onChange={(e) => updateCategory(i, "name", e.target.value)}
+                  placeholder="Category name"
+                  className="border rounded px-3 py-2 w-64"
+                />
+
+                <input
+                  type="number"
+                  value={c.amount}
+                  onChange={(e) => updateCategory(i, "amount", e.target.value)}
+                  placeholder="Amount"
+                  className="border rounded px-3 py-2 w-40"
+                />
+
+                <button
+                  onClick={() => removeCategory(i)}
+                  className="text-red-600 hover:text-red-700 text-sm font-medium"
+                >
+                  Remove
+                </button>
               </div>
-            </>
+            ))}
+
+            <button
+              onClick={addCategory}
+              className="bg-gray-200 hover:bg-gray-300 px-3 py-2 rounded-md"
+            >
+              Add Category
+            </button>
+          </div>
+
+          <button
+            onClick={addMonth}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md font-medium"
+          >
+            Add Month
+          </button>
+        </div>
+
+        {/* History Table */}
+        <div className="bg-white shadow rounded-lg p-6">
+          <h2 className="text-lg font-semibold mb-4">History</h2>
+
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="text-left bg-gray-50">
+                <th className="p-3">Month</th>
+                <th className="p-3">Income</th>
+                <th className="p-3">Savings Goal</th>
+                <th className="p-3">Total Expense</th>
+                <th className="p-3">Top Categories</th>
+                <th className="p-3">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {history.map((h, i) => {
+                const total = h.categories.reduce((a, b) => a + b.amount, 0);
+                const top = h.categories
+                  .slice()
+                  .sort((a, b) => b.amount - a.amount)
+                  .slice(0, 3)
+                  .map((c) => `${c.name}: ₹${c.amount}`)
+                  .join(", ");
+
+              return (
+                <tr key={i} className="border-b">
+                  <td className="p-3">{h.month}</td>
+                  <td className="p-3">₹ {h.income.toLocaleString()}</td>
+                  <td className="p-3">₹ {h.savings_goal.toLocaleString()}</td>
+                  <td className="p-3">₹ {total.toLocaleString()}</td>
+                  <td className="p-3">{top}</td>
+                  <td className="p-3">
+                    <button
+                      onClick={() => removeMonth(i)}
+                      className="text-red-600 hover:text-red-700 font-medium"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Forecast */}
+        <div className="bg-white shadow rounded-lg p-6">
+          <h2 className="text-lg font-semibold mb-4">Forecast</h2>
+
+          {!forecast && <p>No forecast yet.</p>}
+
+          {forecast && (
+            <div className="space-y-4">
+              {forecast.map((f, i) => (
+                <div
+                  key={i}
+                  className="border rounded-lg p-4 bg-gray-50"
+                >
+                  <h3 className="font-medium">{f.month}</h3>
+
+                  <p className="text-gray-700">
+                    <strong>Total Expense:</strong> ₹{f.total_expense.toLocaleString()}
+                  </p>
+                  <p className="text-gray-700">
+                    <strong>Projected Savings:</strong> ₹{f.projected_savings.toLocaleString()}
+                  </p>
+                </div>
+              ))}
+            </div>
           )}
         </div>
-      </main>
+      </div>
     </div>
   );
 }
