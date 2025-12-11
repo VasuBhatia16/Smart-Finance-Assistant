@@ -1,0 +1,13 @@
+{
+  "rmse_lstm": 56447.86788043113,
+  "rmse_xgb": 3265.1107273299617,
+  "rmse_ensemble": 11509.158766825652,
+  "xgb_best_round": 30,
+  "xgb_val_rmse": 8069.793801487306,
+  "lstm_best_val_loss": 1.7683122158050537,
+  "n_supervised_samples": 38,
+  "indices": {
+    "base_end": 22,
+    "meta_end": 29
+  }
+}
