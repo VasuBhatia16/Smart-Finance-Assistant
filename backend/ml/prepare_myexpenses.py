@@ -16,6 +16,8 @@ map_to_global = {
     "Electricity": "utilities",
     "Travel": "travel",
     "Shopping": "shopping",
+    "Education": "education",
+    "Health": "health",
 }
 
 def normalize_category(cat):

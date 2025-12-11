@@ -10,8 +10,6 @@ from ml.model import LSTMForecaster
 from ml.preprocess import build_feature_matrix
 
 TARGET_IDX = 2
-
-
 class Predictor:
     def __init__(self, model_type: str="lstm"):
         """
@@ -96,7 +94,18 @@ class Predictor:
 
         weights = self._dynamic_category_weights(history)
         breakdown = {c: real_total * w for c, w in weights.items()}
-
+        # if(breakdown.get("Food",0)>15000):
+        #     breakdown["Food"]-=7000
+        #     real_total-=7000
+        # if(breakdown.get("Misc",0)>25000):
+        #     breakdown["Misc"]-=5000
+        #     real_total-=5000
+        # if(breakdown.get("food",0)>15000):
+        #     breakdown["food"]-=7000
+        #     real_total-=7000
+        # if(breakdown.get("misc",0)>25000):
+        #     breakdown["misc"]-=5000
+        #     real_total-=5000
         return {
             "predicted_total_expenses": real_total,
             "category_breakdown": breakdown,

@@ -1,0 +1,176 @@
+{
+  "mean": 58652.52694444445,
+  "metadata": {
+    "best_order": null,
+    "best_val_mse": null,
+    "candidates_tried": [
+      {
+        "order": [
+          0,
+          1,
+          1
+        ],
+        "stationary": false,
+        "invertible": false,
+        "error": "ARIMA.__init__() got an unexpected keyword argument 'enforce_invertible'"
+      },
+      {
+        "order": [
+          0,
+          1,
+          1
+        ],
+        "stationary": true,
+        "invertible": false,
+        "error": "ARIMA.__init__() got an unexpected keyword argument 'enforce_invertible'"
+      },
+      {
+        "order": [
+          0,
+          1,
+          1
+        ],
+        "stationary": false,
+        "invertible": true,
+        "error": "ARIMA.__init__() got an unexpected keyword argument 'enforce_invertible'"
+      },
+      {
+        "order": [
+          0,
+          1,
+          1
+        ],
+        "stationary": true,
+        "invertible": true,
+        "error": "ARIMA.__init__() got an unexpected keyword argument 'enforce_invertible'"
+      },
+      {
+        "order": [
+          1,
+          1,
+          0
+        ],
+        "stationary": false,
+        "invertible": false,
+        "error": "ARIMA.__init__() got an unexpected keyword argument 'enforce_invertible'"
+      },
+      {
+        "order": [
+          1,
+          1,
+          0
+        ],
+        "stationary": true,
+        "invertible": false,
+        "error": "ARIMA.__init__() got an unexpected keyword argument 'enforce_invertible'"
+      },
+      {
+        "order": [
+          1,
+          1,
+          0
+        ],
+        "stationary": false,
+        "invertible": true,
+        "error": "ARIMA.__init__() got an unexpected keyword argument 'enforce_invertible'"
+      },
+      {
+        "order": [
+          1,
+          1,
+          0
+        ],
+        "stationary": true,
+        "invertible": true,
+        "error": "ARIMA.__init__() got an unexpected keyword argument 'enforce_invertible'"
+      },
+      {
+        "order": [
+          1,
+          1,
+          1
+        ],
+        "stationary": false,
+        "invertible": false,
+        "error": "ARIMA.__init__() got an unexpected keyword argument 'enforce_invertible'"
+      },
+      {
+        "order": [
+          1,
+          1,
+          1
+        ],
+        "stationary": true,
+        "invertible": false,
+        "error": "ARIMA.__init__() got an unexpected keyword argument 'enforce_invertible'"
+      },
+      {
+        "order": [
+          1,
+          1,
+          1
+        ],
+        "stationary": false,
+        "invertible": true,
+        "error": "ARIMA.__init__() got an unexpected keyword argument 'enforce_invertible'"
+      },
+      {
+        "order": [
+          1,
+          1,
+          1
+        ],
+        "stationary": true,
+        "invertible": true,
+        "error": "ARIMA.__init__() got an unexpected keyword argument 'enforce_invertible'"
+      },
+      {
+        "order": [
+          0,
+          1,
+          0
+        ],
+        "stationary": true,
+        "invertible": true,
+        "error": "ARIMA.__init__() got an unexpected keyword argument 'enforce_invertible'"
+      },
+      {
+        "order": [
+          0,
+          0,
+          1
+        ],
+        "stationary": true,
+        "invertible": true,
+        "error": "ARIMA.__init__() got an unexpected keyword argument 'enforce_invertible'"
+      },
+      {
+        "order": [
+          1,
+          0,
+          0
+        ],
+        "stationary": true,
+        "invertible": true,
+        "error": "ARIMA.__init__() got an unexpected keyword argument 'enforce_invertible'"
+      },
+      {
+        "order": [
+          0,
+          1,
+          1
+        ],
+        "stationary": true,
+        "invertible": true,
+        "error": "ARIMA.__init__() got an unexpected keyword argument 'enforce_invertible'"
+      },
+      {
+        "differenced_attempt_error": "ARIMA.__init__() got an unexpected keyword argument 'enforce_invertible'"
+      }
+    ],
+    "fallback": "mean_predictor",
+    "n_samples": 44,
+    "train_size": 36,
+    "val_size": 8
+  }
+}
