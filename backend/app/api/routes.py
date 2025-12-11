@@ -56,8 +56,6 @@ def predict(req: PredictRequest):
 
         
         total_expense = predicted_total
-
-        
         projected_savings = history[-1].income - total_expense
 
         

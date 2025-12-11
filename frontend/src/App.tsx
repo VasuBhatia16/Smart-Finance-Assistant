@@ -7,10 +7,8 @@ export default function App() {
       month: "",
       income: "",
       savings_goal: "",
-      categories: [
-        { name: "", amount: "" }
-      ]
-    }
+      categories: [{ name: "", amount: "" }],
+    },
   ]);
 
   const [horizon, setHorizon] = useState(1);
@@ -49,57 +47,72 @@ export default function App() {
         month: "",
         income: "",
         savings_goal: "",
-        categories: [{ name: "", amount: "" }]
-      }
+        categories: [{ name: "", amount: "" }],
+      },
     ]);
   };
 
   const runForecast = async () => {
-    setLoading(true);
-    setResult(null);
+  setLoading(true);
+  setResult(null);
 
-    const cleanedHistory = history.map((h) => {
-  const catDict: any = {};
-  h.categories.forEach((c) => {
-    if (c.name && c.amount) {
-      catDict[c.name] = Number(c.amount);
-    }
+  const cleanedHistory = history.map((h) => {
+    const catDict: any = {};
+    h.categories.forEach((c) => {
+      if (c.name && c.amount) {
+        catDict[c.name] = Number(c.amount);
+      }
+    });
+
+    return {
+      month: h.month,
+      income: Number(h.income),
+      savings_goal: Number(h.savings_goal),
+      categories: catDict,
+    };
   });
 
-  return {
-    month: h.month,
-    income: Number(h.income),
-    savings_goal: Number(h.savings_goal),
-    categories: catDict
-  };
-});
+  try {
+    const res = await fetch("http://localhost:8000/api/v1/predict", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        history: cleanedHistory,
+        horizon,
+        model_type: modelType,
+      }),
+    });
+
+    const data = await res.json();
+
+    // ❌ Do NOT set forecast before checking success
+    if (!res.ok) {
+      const msg = data?.detail?.[0]?.msg || "An error occurred";
+      setResult({ error: msg });
+      setLoading(false);
+      return;
+    }
+
+    // ✔ SUCCESS
+    setResult({
+      forecast: data.forecast,
+      note: data.note,
+    });
+
+  } catch (err) {
+    setResult({
+      error: "Prediction failed. Check your input or add at least 3 months.",
+    });
+  }
+
+  setLoading(false);
+};
 
 
-    try {
-      const res = await fetch("http://localhost:8000/api/v1/predict", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          history: cleanedHistory,
-          horizon,
-          model_type: modelType
-        })
-      });
 
-      const data = await res.json();
-      setResult(data);
-    } catch (err: any) {
-  console.error("Prediction failed:", err);
-  alert("Prediction failed. Check input or add at least 3 months.");
-}
-
-
-    setLoading(false);
-  };
 
   return (
     <div className="dashboard-root">
-
       {/* ---------------- SIDEBAR ---------------- */}
       <aside className="sidebar">
         <h3 className="sidebar-title">Smart Finance</h3>
@@ -111,7 +124,7 @@ export default function App() {
             onChange={(e) => setModelType(e.target.value)}
           >
             <option value="xgb">XGBoost</option>
-            <option value="linear">Linear</option>
+            <option value="lstm">LSTM</option>
           </select>
         </div>
 
@@ -162,7 +175,9 @@ export default function App() {
                 <input
                   type="number"
                   value={h.savings_goal}
-                  onChange={(e) => updateHistory(idx, "savings_goal", e.target.value)}
+                  onChange={(e) =>
+                    updateHistory(idx, "savings_goal", e.target.value)
+                  }
                 />
               </div>
             </div>
@@ -186,6 +201,7 @@ export default function App() {
                     updateCategory(idx, cidx, "amount", e.target.value)
                   }
                 />
+
                 {h.categories.length > 1 && (
                   <button
                     className="remove-btn"
@@ -207,12 +223,43 @@ export default function App() {
           + Add Another Month
         </button>
 
+        {/* ---------------- RESULT SECTION ---------------- */}
         {result && (
-          <div className="forecast-box">
-            <h3>Forecast Result</h3>
-            <pre>{JSON.stringify(result, null, 2)}</pre>
-          </div>
-        )}
+  <div className="forecast-box">
+    {result.error ? (
+      <div className="error-box">
+        <strong>Error:</strong> {result.error}
+      </div>
+    ) : (
+      <div className="forecast-success">
+        <h3>Forecast Result</h3>
+
+        {Array.isArray(result.forecast) &&
+          result.forecast.map((f: any, idx: number) => (
+            <div className="forecast-item" key={idx}>
+              <div><strong>Month:</strong> {f.month}</div>
+              <div><strong>Total Expense:</strong> {f.total_expense}</div>
+              <div><strong>Projected Savings:</strong> {f.projected_savings}</div>
+
+              <div className="cat-break">
+                <strong>Category Breakdown:</strong>
+                <ul>
+                  {Object.entries(f.category_breakdown as Record<string, number>).map(([cat, val]: [string, number]) => (
+                    <li key={cat}>
+                      {cat}: {val}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ))}
+
+        {result.note && <p className="note">{result.note}</p>}
+      </div>
+    )}
+  </div>
+)}
+
       </main>
     </div>
   );
